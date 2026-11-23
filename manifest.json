@@ -1,0 +1,11 @@
+
+{
+  "name": "EVA - Guía de Plantas",
+  "short_name": "EVA",
+  "description": "Guía de plantas y humedad del suelo",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#fbf9f6",
+  "theme_color": "#8f6126"
+}
