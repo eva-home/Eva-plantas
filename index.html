@@ -1,0 +1,230 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Guía de Plantas EVA</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+/* Layout: logo plate on top, sticky search and filters, one ruled list where each plant shows its ideal range as a bar on the meter's 0-100% scale */
+:root {
+  --bg: #fbf9f6; --fg: #2a2826; --muted: #6d675f; --line: #e4dccf; --field: #ffffff;
+  --accent: #8f6126; --gold: #b88850; --track: #ece5d9;
+  --plate: #f4efe8; --plate-fg: #2e2e2e; --plate-muted: #5f5950;
+  --seco-bg: #f6ebd9; --seco-fg: #7d5218; --seco-bar: #c9964f;
+  --mod-bg: #e9efe5; --mod-fg: #3a5733; --mod-bar: #6f9a62;
+  --hum-bg: #e5ecf3; --hum-fg: #2c4a68; --hum-bar: #5f8fbd;
+  --f-head: "Space Grotesk", "Helvetica Neue", Arial, sans-serif;
+  --f-body: "Inter", -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #1d1b19; --fg: #ece7df; --muted: #a59d92; --line: #3a3631; --field: #26231f;
+    --accent: #d3a468; --track: #34302b;
+    --seco-bg: #3a2f1d; --seco-fg: #e2b878; --seco-bar: #c9964f;
+    --mod-bg: #26332a; --mod-fg: #a9cf9d; --mod-bar: #7fae71;
+    --hum-bg: #232f3b; --hum-fg: #9cc2e6; --hum-bar: #6ea0d0;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #1d1b19; --fg: #ece7df; --muted: #a59d92; --line: #3a3631; --field: #26231f;
+  --accent: #d3a468; --track: #34302b;
+  --seco-bg: #3a2f1d; --seco-fg: #e2b878; --seco-bar: #c9964f;
+  --mod-bg: #26332a; --mod-fg: #a9cf9d; --mod-bar: #7fae71;
+  --hum-bg: #232f3b; --hum-fg: #9cc2e6; --hum-bar: #6ea0d0;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--f-body); font-size: 15px; line-height: 1.5; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 760px; margin-inline: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+
+.plate { background: var(--plate); border-bottom: 3px solid var(--gold); }
+.plate .wrap { padding-block: 22px 18px; }
+.logo { display: block; width: 150px; height: auto; margin-bottom: 14px; }
+h1 { font-family: var(--f-head); font-weight: 700; font-size: 1.55rem; line-height: 1.15; margin: 0 0 6px; color: var(--plate-fg); text-wrap: balance; }
+.plate p { margin: 0; color: var(--plate-muted); font-size: 0.9rem; max-width: 56ch; }
+
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+.bar .wrap { padding-block: 12px 10px; }
+.search { position: relative; }
+.search svg { position: absolute; left: 13px; top: 50%; translate: 0 -50%; width: 18px; height: 18px; stroke: var(--accent); fill: none; stroke-width: 2.2; stroke-linecap: round; pointer-events: none; }
+#q { width: 100%; font: inherit; font-size: 16px; color: var(--fg); background: var(--field); border: 1.5px solid var(--line); border-radius: 12px; padding: 12px 14px 12px 40px; }
+#q::placeholder { color: var(--muted); }
+#q:focus-visible, .chip:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.chip { font: inherit; font-size: 0.82rem; font-weight: 500; color: var(--fg); background: transparent; border: 1.5px solid var(--line); border-radius: 999px; padding: 5px 12px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+
+main .wrap { padding-block: 12px 8px; }
+.note { margin: 0 0 4px; color: var(--muted); font-size: 0.8rem; }
+#count { margin: 0; color: var(--muted); font-size: 0.8rem; font-variant-numeric: tabular-nums; }
+#list { list-style: none; margin: 0; padding: 0; }
+.item { padding: 14px 0 15px; border-bottom: 1px solid var(--line); }
+.item.seco { --c-bg: var(--seco-bg); --c-fg: var(--seco-fg); --c-bar: var(--seco-bar); }
+.item.mod { --c-bg: var(--mod-bg); --c-fg: var(--mod-fg); --c-bar: var(--mod-bar); }
+.item.hum { --c-bg: var(--hum-bg); --c-fg: var(--hum-fg); --c-bar: var(--hum-bar); }
+.top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.top h2 { font-family: var(--f-head); font-weight: 600; font-size: 1.05rem; line-height: 1.25; margin: 0; min-width: 0; }
+.rng { flex: none; font-family: var(--f-head); font-weight: 600; font-size: 0.95rem; font-variant-numeric: tabular-nums; background: var(--c-bg); color: var(--c-fg); border-radius: 6px; padding: 1px 9px; }
+.meter { position: relative; height: 6px; border-radius: 3px; background: var(--track); margin: 9px 0 8px; }
+.meter i { position: absolute; top: 0; bottom: 0; border-radius: 3px; background: var(--c-bar); }
+.tip { margin: 0 0 6px; font-size: 0.92rem; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px 12px; margin: 0; padding: 0; list-style: none; color: var(--muted); font-size: 0.78rem; }
+.tags b { font-weight: 600; color: var(--c-fg); }
+#empty { padding: 28px 0; color: var(--muted); }
+
+.more { margin-top: 10px; }
+.more summary { cursor: pointer; list-style: none; display: inline-flex; align-items: center; gap: 8px; font-size: 0.84rem; font-weight: 600; color: var(--accent); }
+.more summary::-webkit-details-marker { display: none; }
+.more summary::after { content: ""; width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; rotate: 45deg; translate: 0 -2px; }
+.more[open] summary::after { rotate: 225deg; translate: 0 2px; }
+.panel { margin-top: 10px; padding: 12px 14px; background: var(--c-bg); border-radius: 10px; }
+.panel .desc { margin: 0 0 10px; font-size: 0.9rem; }
+dl.facts { display: grid; grid-template-columns: 6.2rem minmax(0, 1fr); gap: 7px 12px; margin: 0; font-size: 0.86rem; }
+dl.facts dt { font-weight: 600; color: var(--c-fg); }
+dl.facts dd { margin: 0; }
+
+
+details.how { margin-block: 18px 40px; border-top: 1px solid var(--line); padding-top: 14px; }
+.how summary { cursor: pointer; font-family: var(--f-head); font-weight: 600; }
+.how p { color: var(--muted); font-size: 0.9rem; max-width: 62ch; }
+.foot { color: var(--muted); font-size: 0.75rem; padding-block: 0 28px; }
+@media (prefers-reduced-motion: no-preference) { .chip { transition: background 0.15s, color 0.15s; } }
+</style>
+
+<header class="plate">
+  <div class="wrap">
+    <img class="logo" src="logo.png" alt="EVA" width="150" height="49">
+    <h1>Guía de plantas y humedad del suelo</h1>
+    <p>Rangos en % para el sensor digital de suelo. Riega cuando el medidor baje del mínimo del rango ideal.</p>
+  </div>
+</header>
+
+<div class="bar">
+  <div class="wrap">
+    <div class="search">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 21 21"/></svg>
+      <input id="q" type="search" placeholder="Buscar planta, por ejemplo monstera" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Buscar planta">
+    </div>
+    <div class="chips" id="chips" role="group" aria-label="Filtrar por tipo de suelo">
+      <button class="chip" type="button" data-f="all" aria-pressed="true">Todas</button>
+      <button class="chip" type="button" data-f="seco" aria-pressed="false">Suelo seco</button>
+      <button class="chip" type="button" data-f="mod" aria-pressed="false">Suelo moderado</button>
+      <button class="chip" type="button" data-f="hum" aria-pressed="false">Suelo húmedo</button>
+    </div>
+  </div>
+</div>
+
+<main>
+  <div class="wrap">
+    <p class="note">La barra marca el rango ideal sobre la escala de 0 a 100% del medidor.</p>
+    <p id="count" aria-live="polite"></p>
+    <ul id="list"></ul>
+    <p id="empty" hidden></p>
+
+    <details class="how">
+      <summary>Cómo medir bien</summary>
+      <p>Limpia la punta del sensor y clávala a la profundidad de las raíces, entre 5 y 10 cm. Espera a que el valor se estabilice y promedia 2 o 3 puntos de la maceta.</p>
+    </details>
+    <p class="foot">La información sobre mascotas es de referencia; ante una ingestión consulta a un veterinario.<br>EVA · Guía de plantas y humedad del suelo</p>
+  </div>
+</main>
+
+<script>
+// nombre, luz, mínimo %, máximo %, cuidado clave
+var PLANTS = [
+ // nombre, luz, mín %, máx %, cuidado clave, características, luz, riego, temperatura, sustrato, ojo con, mascotas
+ ["Albahaca","Sol",50,70,"Riego frecuente. Pinzar las puntas para que ramifique.","Hierba aromática anual de hojas tiernas, ideal para la cocina.","Sol directo al menos 6 horas.","Mantén el suelo apenas húmedo; no dejes que se seque del todo.","18 a 30 °C. No tolera heladas.","Tierra rica y suelta, con buen drenaje.","Se ennegrece con el frío. Corta las flores para que no amargue.","Segura"],
+ ["Aloe vera (sábila)","Luz brillante",15,35,"Regar cada 2 a 3 semanas. No encharcar.","Suculenta de hojas carnosas con gel en su interior. Crece en roseta.","Luz brillante, con algo de sol directo.","Riega a fondo y espera a que el sustrato seque por completo.","15 a 30 °C. Protégela de heladas.","Mezcla para cactus con perlita o arena, en maceta con agujeros.","Hojas blandas o translúcidas: exceso de agua. Hojas rojizas: demasiado sol.","Tóxica: evita que la muerdan"],
+ ["Anturio","Luz media",50,70,"Sin sol directo. Agradece humedad en el aire.","Planta tropical de flores brillantes en forma de corazón.","Luz brillante indirecta, sin sol directo.","Riega cuando seque la capa superior. Nunca dejes agua en el plato.","18 a 28 °C. Sufre bajo 15 °C.","Sustrato aireado con corteza y perlita.","Hojas amarillas: exceso de agua. Puntas secas: aire muy seco.","Tóxica: evita que la muerdan"],
+ ["Árbol de jade","Luz brillante",15,35,"Dejar secar bien entre riegos.","Suculenta de tronco leñoso y hojas gruesas y brillantes. Vive muchos años.","Luz brillante; tolera algo de sol directo.","Riega cuando el sustrato esté seco; muy poco en invierno.","10 a 28 °C. No tolera heladas.","Mezcla para suculentas con buen drenaje.","Hojas arrugadas: falta de agua. Hojas blandas que caen: exceso.","Tóxica: evita que la muerdan"],
+ ["Aspidistra","Poca luz",30,50,"Muy resistente. Riego moderado.","Hojas largas y oscuras. Famosa por aguantar casi todo.","Luz baja a media. Evita el sol directo.","Riego moderado; deja secar la capa superior.","10 a 25 °C. Tolera frío ligero.","Tierra de maceta universal con buen drenaje.","El sol directo quema las hojas. Crece lento: no abuses del abono.","Segura"],
+ ["Begonia","Luz brillante",40,60,"No mojar las hojas. Buena ventilación.","Hojas decorativas y flores en tonos cálidos.","Luz brillante indirecta.","Mantén el sustrato apenas húmedo; deja secar la capa superior.","16 a 24 °C. No tolera heladas.","Mezcla ligera y aireada con buen drenaje.","Mojar las hojas favorece los hongos. Riega al pie.","Tóxica, sobre todo las raíces"],
+ ["Cactus","Sol",10,30,"Riego muy escaso; en invierno casi nada.","Plantas espinosas que guardan agua en el tallo. Existen muchísimas especies.","Sol directo o luz muy intensa.","Riega a fondo y deja secar por completo. En invierno casi nada.","10 a 30 °C. Muchas especies no toleran heladas.","Tierra para cactus con arena o perlita.","Base blanda u oscura: pudrición por exceso de agua.","Generalmente segura; ojo con las espinas"],
+ ["Cactus de Navidad","Luz media",40,60,"No moverlo cuando tenga botones.","Cactus de tallos colgantes que florece en los meses fríos.","Luz brillante indirecta.","Riego moderado; deja secar la capa superior entre riegos.","15 a 24 °C. Las noches frescas ayudan a florecer.","Mezcla aireada y ligera.","Si lo mueves con botones, los suelta. Evita las corrientes de aire.","Segura"],
+ ["Calathea","Luz media",60,80,"Usar agua reposada. Hojas enrolladas: sed.","Hojas estampadas que se mueven con la luz del día.","Luz media. Sin sol directo.","Mantén el sustrato apenas húmedo, con agua reposada.","18 a 26 °C. Odia el frío y las corrientes.","Mezcla suelta y rica en materia orgánica.","Puntas secas: aire seco o agua con mucho cloro.","Segura"],
+ ["Cilantro","Sol",50,70,"Riego parejo. Se espiga con calor.","Hierba anual de hojas aromáticas y crecimiento rápido.","Sol o luz brillante; tolera semisombra.","Riego parejo, sin encharcar.","10 a 24 °C. El calor la hace florecer.","Tierra suelta y fértil; maceta profunda.","Con calor se espiga y pierde hojas. Siembra de forma escalonada.","Segura"],
+ ["Cinta (planta araña)","Luz media",40,60,"Puntas marrones: cloro del agua o aire seco.","Hojas largas y arqueadas que producen hijuelos colgantes.","Luz media a brillante indirecta.","Riego moderado; deja secar la capa superior.","10 a 27 °C.","Tierra de maceta universal.","Puntas marrones: cloro, sales del agua o aire seco.","Segura"],
+ ["Clivia","Luz media",30,50,"Regar poco en invierno para que florezca.","Hojas anchas y racimos naranjos en primavera. Vive muchos años.","Luz media; sin sol directo.","Riego moderado en primavera y verano; poco en invierno.","10 a 25 °C. Un invierno fresco favorece la floración.","Mezcla suelta y bien drenada.","Prefiere maceta ajustada: no la trasplantes seguido.","Tóxica: evita que la muerdan"],
+ ["Croton","Sol",50,70,"Mucha luz mantiene sus colores.","Hojas gruesas y coloridas en amarillo, rojo y verde.","Sol o luz muy brillante para conservar el color.","Mantén apenas húmedo; deja secar la capa superior.","18 a 28 °C. Sufre bajo 12 °C.","Mezcla rica y bien drenada.","Pierde hojas con frío, corrientes o cambios de lugar.","Tóxica: evita que la muerdan"],
+ ["Dracaena","Luz media",30,50,"Sensible al cloro: usar agua reposada.","Tallo erguido con penachos de hojas largas.","Luz media a brillante indirecta.","Deja secar la capa superior; riega con agua reposada.","16 a 27 °C.","Mezcla universal con buen drenaje.","Puntas marrones: cloro, flúor o riego irregular.","Tóxica: evita que la muerdan"],
+ ["Echeveria","Sol",10,30,"Regar al sustrato, sin mojar la roseta.","Suculenta en roseta de hojas carnosas, a veces con tonos rosados.","Sol directo o luz muy intensa.","Riega al sustrato y deja secar por completo.","10 a 30 °C. No tolera heladas fuertes.","Mezcla para suculentas con mucho drenaje.","Sin luz suficiente se estira y pierde su forma. No mojes la roseta.","Segura"],
+ ["Ficus benjamina","Luz brillante",40,60,"No cambiarlo de lugar seguido.","Árbol pequeño de hojas finas y brillantes.","Luz brillante indirecta.","Riega cuando seque la capa superior.","16 a 28 °C. Odia las corrientes de aire.","Mezcla universal con buen drenaje.","Bota hojas si lo cambias de lugar o si hace frío.","Tóxica: el látex irrita"],
+ ["Filodendro","Luz media",40,60,"Apenas húmedo, sin encharcar.","Hojas en forma de corazón; trepadora o colgante.","Luz media a brillante indirecta.","Mantén apenas húmedo; deja secar la capa superior.","16 a 28 °C.","Mezcla aireada con corteza o perlita.","Hojas amarillas: exceso de agua. Hojas pálidas: falta de luz.","Tóxica: evita que la muerdan"],
+ ["Frutilla","Sol",60,80,"Riego frecuente sin mojar el fruto.","Planta rastrera que da frutos dulces en primavera y verano.","Sol directo, al menos 6 horas.","Riego frecuente y liviano; sin mojar el fruto.","10 a 25 °C. Tolera el frío.","Tierra rica en materia orgánica y bien drenada.","Los frutos en contacto con la tierra se pudren: levántalos.","Segura"],
+ ["Geranio","Sol",40,60,"Quitar flores secas. Regar al pie.","Flores abundantes en rojo, rosado o blanco.","Sol directo o luz muy brillante.","Deja secar la capa superior entre riegos; riega al pie.","10 a 25 °C. Protégelo de heladas.","Tierra suelta con buen drenaje.","Hojas amarillas en la base: exceso de agua.","Tóxica en grado leve"],
+ ["Gomero (Ficus elástica)","Luz brillante",40,60,"Limpiar hojas con paño húmedo.","Hojas grandes, gruesas y brillantes, de crecimiento erguido.","Luz brillante indirecta.","Riega cuando seque la capa superior; menos en invierno.","15 a 28 °C.","Mezcla universal bien drenada.","Pierde las hojas bajas por exceso de riego o poca luz.","Tóxica: el látex irrita"],
+ ["Haworthia","Luz media",15,35,"Riego escaso. Sin sol fuerte del mediodía.","Suculenta pequeña en roseta, con hojas rayadas o translúcidas.","Luz media a brillante. Evita el sol fuerte.","Riego escaso: deja secar por completo.","10 a 27 °C.","Mezcla para suculentas con mucho drenaje.","El sol fuerte quema las hojas; el exceso de agua pudre la base.","Segura"],
+ ["Helecho","Poca luz",60,80,"Nunca dejar secar del todo.","Frondas finas y plumosas. Ama la humedad.","Luz suave o sombra. Sin sol directo.","Sustrato siempre húmedo, sin encharcar.","15 a 24 °C.","Mezcla esponjosa y rica en materia orgánica.","Frondas cafés: aire seco o riego irregular. Rocíalo con agua.","Generalmente segura"],
+ ["Hiedra","Luz media",40,60,"Suelo levemente húmedo. Revisar ácaros.","Trepadora o colgante de hojas lobuladas.","Luz media a brillante.","Deja secar apenas la capa superior.","10 a 22 °C. Prefiere lugares frescos.","Mezcla universal.","Con aire seco aparecen ácaros: revisa el reverso de las hojas.","Tóxica: evita que la muerdan"],
+ ["Hortensia","Sol suave",60,80,"Muy sedienta. Regar en la tarde.","Arbusto de grandes racimos de flores en verano.","Sol suave de mañana o semisombra.","Muy sedienta: mantén húmedo y riega seguido en verano.","Tolera el frío; protege los brotes de heladas tardías.","Tierra rica en materia orgánica.","Hojas caídas al mediodía: falta de agua. Riega en la tarde.","Tóxica: evita que la muerdan"],
+ ["Hoya (flor de cera)","Luz brillante",20,40,"Riego escaso. No cortar los pedúnculos.","Trepadora de hojas carnosas y flores en forma de estrella.","Luz brillante indirecta.","Deja secar casi por completo entre riegos.","15 a 28 °C.","Mezcla muy aireada con corteza y perlita.","No cortes los pedúnculos: vuelven a florecer ahí.","Segura"],
+ ["Jazmín","Sol",50,70,"Riego regular. Podar después de florecer.","Trepadora de flores blancas muy perfumadas.","Sol directo o luz muy brillante.","Riego regular, sin encharcar.","10 a 28 °C. Protégelo de heladas fuertes.","Tierra rica y bien drenada.","Con poco sol florece poco.","Considerada segura"],
+ ["Kalanchoe","Sol",15,35,"Riego escaso. Quitar flores marchitas.","Suculenta de flores pequeñas y duraderas en racimos.","Sol o luz muy brillante.","Deja secar por completo entre riegos.","12 a 28 °C.","Mezcla para suculentas.","Tallos largos y flacos: falta de luz. Quita las flores marchitas.","Tóxica: evita que la muerdan"],
+ ["Lavanda","Sol",20,40,"Suelo bien drenado. Podar tras florecer.","Arbusto aromático de flores moradas que atrae abejas.","Sol directo todo el día.","Riego escaso; el suelo debe secar entre riegos.","Resiste frío y calor. Odia el exceso de humedad.","Suelo pobre, arenoso y muy bien drenado.","Se pudre con suelo húmedo. Poda tras florecer, sin cortar la madera vieja.","Puede dar molestias digestivas si la comen"],
+ ["Lechuga","Sol suave",60,80,"Riego frecuente y liviano.","Hortaliza de hojas tiernas y crecimiento rápido.","Sol o semisombra.","Riego frecuente y liviano; suelo siempre apenas húmedo.","10 a 20 °C. El calor la hace amarga.","Tierra suelta y fértil.","Con calor se espiga y se amarga. Cosecha las hojas externas.","Segura"],
+ ["Lengua de suegra (Sansevieria)","Cualquier luz",15,35,"Casi indestructible. Evitar exceso de riego.","Hojas rígidas y erguidas. Muy resistente.","Desde luz baja hasta sol directo.","Deja secar por completo; muy poco en invierno.","13 a 30 °C. No tolera heladas.","Mezcla para suculentas o universal con arena.","El exceso de riego pudre la base. Evita el frío intenso.","Tóxica: evita que la muerdan"],
+ ["Limonero (maceta)","Sol",50,70,"Riego profundo con buen drenaje.","Árbol frutal que puede cultivarse en una maceta grande.","Sol directo, al menos 6 horas.","Riego profundo y espaciado; deja secar la capa superior.","12 a 30 °C. Protégelo de heladas.","Mezcla para cítricos con drenaje excelente.","Hojas amarillas: falta de nutrientes o exceso de agua. Abona en temporada cálida.","Los cítricos irritan a perros y gatos"],
+ ["Menta","Sol suave",60,80,"Le gusta la humedad. Mejor en maceta propia.","Hierba aromática muy vigorosa que se expande rápido.","Sol o semisombra.","Mantén húmedo; no dejes que se seque del todo.","10 a 25 °C. Rebrota después del frío.","Tierra rica, suelta y húmeda.","Invade: cultívala sola en su propia maceta.","Puede dar molestias digestivas en cantidad"],
+ ["Monstera","Luz brillante",40,60,"Regar al secar la capa superior.","Hojas grandes con cortes y agujeros. Trepa con raíces aéreas.","Luz brillante indirecta.","Riega cuando seque la capa superior.","18 a 28 °C.","Mezcla aireada con corteza o perlita.","Hojas sin cortes: poca luz. Hojas amarillas: exceso de agua.","Tóxica: evita que la muerdan"],
+ ["Orégano","Sol",20,40,"Tolera sequía. Cosechar seguido.","Hierba mediterránea aromática y resistente.","Sol directo.","Riego escaso; deja secar entre riegos.","Resiste frío y calor.","Suelo pobre y bien drenado.","Se pudre con exceso de agua. Poda seguido para que ramifique.","Puede dar molestias digestivas en cantidad"],
+ ["Orquídea (Phalaenopsis)","Luz brillante",30,50,"En corteza el medidor falla: mejor riego por inmersión.","Flores duraderas sobre una vara. Crece sobre corteza, no en tierra.","Luz brillante indirecta.","Sumerge la maceta 10 minutos y deja escurrir cuando la corteza seque.","18 a 28 °C. Una noche fresca ayuda a florecer.","Corteza especial para orquídeas, en maceta transparente.","Raíces plateadas: piden agua. Raíces blandas y marrones: exceso.","Segura"],
+ ["Palmera areca","Luz brillante",50,70,"Puntas secas: poca humedad ambiental.","Palma de hojas arqueadas y delgadas.","Luz brillante indirecta.","Riego regular; deja secar apenas la capa superior.","18 a 28 °C.","Mezcla suelta y bien drenada.","Puntas secas: aire seco o agua con sales.","Segura"],
+ ["Peperomia","Luz media",30,50,"Hojas carnosas. Riego moderado.","Planta compacta de hojas carnosas y texturas variadas.","Luz media a brillante indirecta.","Riego moderado; deja secar la capa superior.","16 a 26 °C.","Mezcla suelta y ligera.","Es sensible al exceso de agua: las hojas se ponen blandas.","Segura"],
+ ["Perejil","Sol suave",50,70,"Riego parejo; cosechar hojas externas.","Hierba bienal de hojas rizadas o lisas.","Sol o semisombra.","Riego parejo, sin encharcar.","10 a 24 °C. Tolera el frío.","Tierra fértil y profunda.","Cosecha las hojas externas para que siga produciendo.","Seguro en pequeñas cantidades"],
+ ["Petunia","Sol",50,70,"Regar al pie. Quitar flores secas.","Flores abundantes en muchos colores durante la temporada cálida.","Sol directo.","Riega al pie sin mojar las flores; no dejes secar del todo.","10 a 28 °C. No tolera heladas.","Tierra rica y bien drenada.","Quita las flores secas para prolongar la floración.","Segura"],
+ ["Potus","Luz media",30,60,"Tolera descuidos. Hojas caídas: sed.","Trepadora o colgante muy resistente, de hojas con vetas claras.","Luz media; tolera poca luz.","Riega cuando seque la capa superior.","15 a 28 °C.","Mezcla universal.","Hojas caídas: sed. Hojas amarillas: exceso de agua.","Tóxica: evita que la muerdan"],
+ ["Romero","Sol",20,40,"Resistente a sequía. Regar si seca a 5 cm.","Arbusto aromático de hojas finas y flores azuladas.","Sol directo.","Riego escaso; riega si el suelo seca a 5 cm.","Resiste frío y calor.","Suelo pobre, arenoso y bien drenado.","Se pudre con exceso de agua.","Segura"],
+ ["Rosa","Sol",50,70,"Riego profundo y espaciado, al pie.","Arbusto de flores perfumadas y con espinas.","Sol directo, al menos 6 horas.","Riego profundo y espaciado, al pie.","Tolera el frío; protege los brotes de heladas tardías.","Tierra rica, profunda y bien drenada.","Mojar el follaje favorece los hongos. Poda a fines del invierno.","Segura; ojo con las espinas"],
+ ["Spatifilo (cala de interior)","Luz media",50,70,"Si se cae, pide agua: se recupera rápido.","Hojas verdes brillantes y flores blancas en forma de vela.","Luz media; tolera poca luz.","Mantén apenas húmedo.","16 a 28 °C.","Mezcla rica y esponjosa.","Se desploma cuando tiene sed y se recupera al regar.","Tóxica: evita que la muerdan"],
+ ["Tomate","Sol",50,70,"Riego parejo: los cambios bruscos rajan el fruto.","Hortaliza trepadora de frutos jugosos en la temporada cálida.","Sol directo, de 6 a 8 horas.","Riego parejo y profundo, al pie.","18 a 30 °C. No tolera heladas.","Tierra rica, en maceta grande y profunda.","El riego irregular raja los frutos. Necesita tutor.","Hojas y tallos tóxicos; el fruto maduro es seguro"],
+ ["Tradescantia (misionera)","Luz brillante",40,60,"Pinzar para que quede tupida.","Colgante de hojas moradas o rayadas que crece rápido.","Luz brillante indirecta.","Riego moderado; deja secar la capa superior.","12 a 26 °C.","Mezcla universal.","Con poca luz pierde el color. Pinza las puntas.","Puede irritar la piel y el hocico"],
+ ["Violeta africana","Luz brillante",50,70,"Regar por la base, sin mojar hojas.","Planta compacta que florece casi todo el año.","Luz brillante indirecta.","Riega por la base con agua a temperatura ambiente.","18 a 26 °C.","Mezcla liviana especial para violetas.","El agua sobre las hojas deja manchas.","Segura"],
+ ["Yuca","Sol",20,40,"Tolera sequía. Menos riego en invierno.","Planta de tronco leñoso y hojas puntiagudas, de aspecto arbóreo.","Sol directo o luz muy brillante.","Deja secar bien entre riegos.","5 a 30 °C. Tolera frío leve.","Mezcla con arena y buen drenaje.","Pudrición del tronco por exceso de agua.","Tóxica: evita que la muerdan"],
+ ["Zamioculca (ZZ)","Luz media",20,40,"Guarda agua en sus rizomas. Regar poco.","Hojas brillantes y tallos gruesos. Muy resistente.","Luz baja a media.","Riega poco: guarda agua en sus rizomas.","15 a 28 °C.","Mezcla suelta con buen drenaje.","Hojas amarillas: exceso de agua. Crece lento.","Tóxica: evita que la muerdan"]
+];
+var CAT_LABEL = { seco: "Suelo seco", mod: "Suelo moderado", hum: "Suelo húmedo" };
+function catOf(mn, mx) { return mx <= 40 ? "seco" : (mn >= 50 ? "hum" : "mod"); }
+function norm(s) { return s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(); }
+function esc(s) { return s.replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+var list = document.getElementById("list"), qEl = document.getElementById("q");
+var countEl = document.getElementById("count"), emptyEl = document.getElementById("empty");
+var filter = "all";
+var LABELS = ["Luz", "Riego", "Temperatura", "Sustrato", "Ojo con", "Mascotas"];
+var rows = PLANTS.map(function (p) {
+  var c = catOf(p[2], p[3]);
+  var facts = "";
+  for (var i = 0; i < LABELS.length; i++) facts += "<dt>" + LABELS[i] + "</dt><dd>" + esc(p[6 + i]) + "</dd>";
+  return { c: c, hay: norm(p[0] + " " + p[1] + " " + p[4]), html:
+    '<li class="item ' + c + '"><div class="top"><h2>' + esc(p[0]) + '</h2><span class="rng">' + p[2] + "–" + p[3] + '%</span></div>' +
+    '<div class="meter" aria-hidden="true"><i style="left:' + p[2] + "%;width:" + (p[3] - p[2]) + '%"></i></div>' +
+    '<p class="tip">' + esc(p[4]) + '</p>' +
+    '<ul class="tags"><li>' + esc(p[1]) + '</li><li><b>Regar bajo ' + p[2] + '%</b></li><li>' + CAT_LABEL[c] + '</li></ul>' +
+    '<details class="more"><summary>Ver características y cuidados</summary><div class="panel"><p class="desc">' + esc(p[5]) + '</p><dl class="facts">' + facts + '</dl></div></details></li>' };
+});
+
+function render() {
+  var terms = norm(qEl.value).split(/\s+/).filter(Boolean);
+  var out = rows.filter(function (r) {
+    return (filter === "all" || r.c === filter) && terms.every(function (t) { return r.hay.indexOf(t) !== -1; });
+  });
+  list.innerHTML = out.map(function (r) { return r.html; }).join("");
+  countEl.textContent = out.length === 1 ? "1 planta" : out.length + " plantas";
+  if (out.length === 0) {
+    emptyEl.hidden = false;
+    emptyEl.textContent = qEl.value.trim()
+      ? "No encontré “" + qEl.value.trim() + "”. Prueba con otro nombre, por ejemplo monstera o aloe."
+      : "No hay plantas en este tipo de suelo.";
+  } else { emptyEl.hidden = true; }
+}
+qEl.addEventListener("input", render);
+document.getElementById("chips").addEventListener("click", function (e) {
+  var b = e.target.closest(".chip"); if (!b) return;
+  filter = b.getAttribute("data-f");
+  document.querySelectorAll(".chip").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+  render();
+});
+render();
+</script>
+
+</body></html>
