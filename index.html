@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style><link rel="manifest" href="manifest.json"><meta name="theme-color" content="#8f6126"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="EVA Plantas"><meta name="apple-mobile-web-app-status-bar-style" content="default"></head><body>
 <title>Guía de Plantas EVA</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap">
@@ -93,6 +93,11 @@ dl.facts dd { margin: 0; }
 details.how { margin-block: 18px 40px; border-top: 1px solid var(--line); padding-top: 14px; }
 .how summary { cursor: pointer; font-family: var(--f-head); font-weight: 600; }
 .how p { color: var(--muted); font-size: 0.9rem; max-width: 62ch; }
+details.how.first { margin-bottom: 0; }
+details.how.second { margin-block: 0 40px; }
+.how b { color: var(--fg); }
+.installbtn { font: inherit; font-size: 0.84rem; font-weight: 600; color: var(--bg); background: var(--accent); border: 0; border-radius: 999px; padding: 8px 16px; cursor: pointer; }
+.installbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .foot { color: var(--muted); font-size: 0.75rem; padding-block: 0 28px; }
 @media (prefers-reduced-motion: no-preference) { .chip { transition: background 0.15s, color 0.15s; } }
 </style>
@@ -130,9 +135,16 @@ details.how { margin-block: 18px 40px; border-top: 1px solid var(--line); paddin
     <ul id="list"></ul>
     <p id="empty" hidden></p>
 
-    <details class="how">
+    <details class="how first">
       <summary>Cómo medir bien</summary>
       <p>Limpia la punta del sensor y clávala a la profundidad de las raíces, entre 5 y 10 cm. Espera a que el valor se estabilice y promedia 2 o 3 puntos de la maceta.</p>
+    </details>
+    <details class="how second">
+      <summary>Guardar en tu celular</summary>
+      <p>Así abres la guía desde un ícono, sin escanear el QR y también sin internet.</p>
+      <p><b>iPhone (Safari):</b> toca Compartir y luego “Agregar a inicio”.</p>
+      <p><b>Android (Chrome):</b> toca los tres puntos y luego “Instalar aplicación” o “Agregar a la pantalla principal”.</p>
+      <button id="install" class="installbtn" type="button" hidden>Instalar ahora</button>
     </details>
     <p class="foot">La información sobre mascotas es de referencia; ante una ingestión consulta a un veterinario.<br>EVA · Guía de plantas y humedad del suelo</p>
   </div>
@@ -264,6 +276,18 @@ document.getElementById("chips").addEventListener("click", function (e) {
   render();
 });
 render();
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
+}
+var installEvt = null, installBtn = document.getElementById("install");
+window.addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); installEvt = e; installBtn.hidden = false; });
+installBtn.addEventListener("click", function () {
+  if (!installEvt) return;
+  installEvt.prompt();
+  installEvt.userChoice.then(function () { installEvt = null; installBtn.hidden = true; });
+});
+window.addEventListener("appinstalled", function () { installBtn.hidden = true; });
 </script>
 
 </body></html>
