@@ -161,6 +161,13 @@ dl.facts dd { margin: 0; }
 .id-name { font-family: var(--f-head); font-weight: 700; font-size: 1.05rem; line-height: 1.25; margin: 0 0 2px; }
 .id-sci { margin: 0 0 8px; color: var(--muted); font-size: 0.82rem; font-style: italic; }
 .id-out .item .id-sci { margin: 6px 0 2px; }
+.id-ref { margin: 0 0 12px; }
+.id-refbtn { display: flex; align-items: center; gap: 12px; width: 100%; padding: 6px; font: inherit; font-size: 0.8rem; color: var(--muted); text-align: left; background: rgba(255, 255, 255, 0.55); border: 1px solid var(--line); border-radius: 12px; cursor: pointer; }
+.id-refbtn img { width: 76px; height: 76px; flex: none; object-fit: cover; border-radius: 8px; }
+.id-refbtn b { display: block; color: var(--fg); font-size: 0.86rem; margin-bottom: 2px; }
+.id-refbtn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.id-lb { position: fixed; inset: 0; z-index: 99; display: flex; align-items: center; justify-content: center; padding: 16px; background: rgba(40, 28, 12, 0.88); cursor: zoom-out; }
+.id-lb img { max-width: 100%; max-height: 100%; border-radius: 12px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5); }
 .id-out .item:last-of-type { border-bottom: 0; }
 .id-credit { margin: 4px 0 0; color: var(--muted); font-size: 0.72rem; }
 .id-credit a { color: inherit; }
@@ -691,9 +698,43 @@ if ("serviceWorker" in navigator) {
     }
     return h;
   }
+  // Foto de referencia de la planta (de Pl@ntNet si viene en la respuesta; si no, de Wikipedia) y ampliación al tocar
+  var refToken = 0;
+  function showRef(small, big, from) {
+    var box = out.querySelector(".id-ref"); if (!box) return;
+    box.innerHTML = '<button type="button" class="id-refbtn" data-big="' + esc(big) + '"><img src="' + esc(small) + '" alt="Foto de referencia" loading="lazy">' +
+      "<span><b>Así se ve (referencia)</b>Compárala con tu foto. Toca para agrandar.<br>Imagen: " + from + "</span></button>";
+    box.hidden = false;
+  }
+  function wikiImage(title, cb) {
+    fetch("https://en.wikipedia.org/api/rest_v1/page/summary/" + encodeURIComponent(title.replace(/ /g, "_")))
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) { cb(d && d.thumbnail ? d : null); })
+      .catch(function () { cb(null); });
+  }
+  function loadRef(r) {
+    var my = ++refToken, im = r.images && r.images[0] && r.images[0].url;
+    if (im && (im.m || im.s || im.o)) { showRef(im.m || im.s || im.o, im.o || im.m || im.s, "Pl@ntNet"); return; }
+    var sci = r.species.scientificNameWithoutAuthor || "";
+    wikiImage(sci, function (d) {
+      if (my !== refToken) return;
+      if (d) { showRef(d.thumbnail.source, (d.originalimage || d.thumbnail).source, "Wikipedia"); return; }
+      var gen = sci.split(/\s+/)[0];
+      if (gen && gen !== sci) wikiImage(gen, function (g) { if (my === refToken && g) showRef(g.thumbnail.source, (g.originalimage || g.thumbnail).source, "Wikipedia"); });
+    });
+  }
+  function closeLb() { var l = document.getElementById("idLb"); if (l) l.remove(); }
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeLb(); });
+  out.addEventListener("click", function (e) {
+    var b = e.target.closest(".id-refbtn"); if (!b) return;
+    closeLb();
+    var l = document.createElement("div"); l.id = "idLb"; l.className = "id-lb"; l.setAttribute("role", "dialog"); l.setAttribute("aria-label", "Foto de referencia ampliada");
+    var im = document.createElement("img"); im.alt = "Foto de referencia ampliada"; im.src = b.getAttribute("data-big");
+    l.appendChild(im); l.addEventListener("click", closeLb); document.body.appendChild(l);
+  });
   function show(results, prev, k) {
     lastRes = results; lastPrev = prev;
-    var h = prev ? '<img class="id-prev" alt="Tu foto" src="' + prev + '">' : "";
+    var h = prev ? '<img class="id-prev" alt="Tu foto" src="' + prev + '">' : "", refRes = null;
     var umbral = Math.round(UMBRAL * 100) + "%";
     if (k == null && results[0].score < UMBRAL) {
       h += '<p class="id-name">No estoy seguro de cuál es</p>' +
@@ -702,14 +743,16 @@ if ("serviceWorker" in navigator) {
     } else {
       if (k == null) k = 0;
       var r = results[k], sp = r.species, best = matchPlant(sp);
+      refRes = r;
       var sci = sp.scientificNameWithoutAuthor, cn = (sp.commonNames || [])[0];
+      var refBox = '<div class="id-ref" hidden></div>';
       var sciLine = '<p class="id-sci">Nombre científico: <i>' + esc(sci) + "</i> · " + pct(r) + " de coincidencia</p>";
       if (best !== -1) {
-        h += '<ul style="list-style:none;margin:0;padding:0">' +
+        h += refBox + '<ul style="list-style:none;margin:0;padding:0">' +
           rows[best].html.replace('<details class="more">', '<details class="more" open>').replace('<div class="meter"', sciLine + '<div class="meter"') + "</ul>";
         if (r.score < UMBRAL) h += '<p class="id-msg" style="margin-top:8px">La coincidencia es baja (' + pct(r) + "). Confirma que sea tu planta antes de seguir estos cuidados.</p>";
       } else {
-        h += '<p class="id-name">' + esc(cn || sci) + "</p>" + sciLine +
+        h += refBox + '<p class="id-name">' + esc(cn || sci) + "</p>" + sciLine +
           '<p class="id-msg">Esta planta todavía no está en el catálogo de EVA, así que no tengo su rango de humedad. Prueba con otra foto o búscala abajo por nombre.</p>';
       }
       var chips = optionChips(results, k, 4);
@@ -717,6 +760,7 @@ if ("serviceWorker" in navigator) {
     }
     h += '<p class="id-credit">Identificación con <a href="https://plantnet.org" target="_blank" rel="noopener">Pl@ntNet</a></p>';
     out.hidden = false; out.innerHTML = h;
+    if (refRes) loadRef(refRes);
   }
   out.addEventListener("click", function (e) {
     var b = e.target.closest(".id-opt"); if (!b || !lastRes) return;
