@@ -164,18 +164,20 @@ dl.facts dd { margin: 0; }
 .id-credit { margin: 4px 0 0; color: var(--muted); font-size: 0.72rem; }
 .id-credit a { color: inherit; }
 
-.ident { background: #2f5d3a; border-color: #244a2d; border-left: 5px solid #8fc29a; color: #fff; }
-.ident .m-title { color: #fff; }
-.ident .m-sub { color: #d7e9da; }
-.ident .m-drop { color: #bfe3c8 !important; }
-.ident .inst-btn { background: #f4efe8; color: #244a2d; }
+/* Tarjeta de identificación: crema cálido con acento dorado, relieve suave y hoja de fondo */
+.ident { --id-1: #fbf6ec; --id-2: #f0e5cf; position: relative; overflow: hidden; background: linear-gradient(155deg, var(--id-1) 0%, var(--id-2) 100%); border: 1.5px solid var(--gold); border-left-width: 5px; box-shadow: 0 10px 26px -12px rgba(143, 97, 38, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.7); }
+.ident::before { content: ""; position: absolute; right: -26px; bottom: -30px; width: 190px; height: 190px; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238f6126' stroke-width='0.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 2C6.5 5.5 4.5 11 6.2 16.5c.9 2.6 3 4.3 5.8 5.5 2.8-1.2 4.9-2.9 5.8-5.5C19.5 11 17.5 5.5 12 2z'/%3E%3Cpath d='M12 5v17M12 10l-3-2M12 14l-3.5-2.2M12 10l3-2M12 14l3.5-2.2'/%3E%3C/svg%3E") no-repeat center / contain; opacity: 0.16; rotate: -18deg; pointer-events: none; z-index: 0; }
+.ident > * { position: relative; z-index: 1; }
+.ident .m-drop { width: 46px; height: 46px; padding: 11px; border-radius: 50%; color: #fff !important; background: linear-gradient(145deg, var(--gold), var(--accent)); box-shadow: 0 4px 10px -3px rgba(143, 97, 38, 0.6); }
+.ident .m-title { color: var(--fg); }
+.ident .inst-btn { background: linear-gradient(135deg, #a8742f 0%, #8f6126 100%); color: #fff8ee; box-shadow: 0 8px 16px -8px rgba(143, 97, 38, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.25); }
 .ident .inst-btn:disabled { opacity: 0.6; cursor: default; }
-.ident .id-alt { color: #e6f3e8; }
-.ident .id-alt:focus-visible, .ident .inst-btn:focus-visible { outline-color: #fff; }
-.ident .id-out { margin-top: 14px; padding: 12px 14px; background: var(--bg); color: var(--fg); border-radius: 12px; }
+.ident .id-alt { color: var(--accent); }
+.ident .id-out { margin-top: 14px; padding: 12px 14px; background: var(--field); color: var(--fg); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 6px 16px -12px rgba(0, 0, 0, 0.35); }
 .ident .id-out .id-prev { margin-bottom: 10px; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ident { background: #24412b; border-color: #1b3321; } }
-:root[data-theme="dark"] .ident { background: #24412b; border-color: #1b3321; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ident { --id-1: #2d2821; --id-2: #231f1a; box-shadow: 0 10px 26px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.05); } :root:not([data-theme="light"]) .ident::before { opacity: 0.12; } }
+:root[data-theme="dark"] .ident { --id-1: #2d2821; --id-2: #231f1a; box-shadow: 0 10px 26px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.05); }
+:root[data-theme="dark"] .ident::before { opacity: 0.12; }
 
 .find { padding-block: 20px 12px; }
 .find-t { font-family: var(--f-head); font-weight: 700; font-size: 1.2rem; line-height: 1.2; margin: 0; }
@@ -554,7 +556,7 @@ if ("serviceWorker" in navigator) {
   var PROXY_URL = "https://eva-identificar.estebanlhrimp.workers.dev";
   // Nombre científico (especie o género) -> nombre en el catálogo
   var SP = { "ficus benjamina": "Ficus benjamina", "ficus lyrata": "Ficus lyrata", "ficus elastica": "Gomero (Ficus elástica)",
-    "dracaena trifasciata": "Lengua de suegra (Sansevieria)", "dracaena angustifolia": "Dracaena", "allium schoenoprasum": "Cebollín",
+    "dracaena trifasciata": "Lengua de suegra (Sansevieria)", "dracaena hyacinthoides": "Lengua de suegra (Sansevieria)", "dracaena angolensis": "Lengua de suegra (Sansevieria)", "dracaena ehrenbergii": "Lengua de suegra (Sansevieria)", "dracaena masoniana": "Lengua de suegra (Sansevieria)", "dracaena pethera": "Lengua de suegra (Sansevieria)", "dracaena kirkii": "Lengua de suegra (Sansevieria)", "dracaena parva": "Lengua de suegra (Sansevieria)", "dracaena francisii": "Lengua de suegra (Sansevieria)", "dracaena burmanica": "Lengua de suegra (Sansevieria)", "dracaena zeylanica": "Lengua de suegra (Sansevieria)", "dracaena suffruticosa": "Lengua de suegra (Sansevieria)", "dracaena aethiopica": "Lengua de suegra (Sansevieria)", "dracaena bacularis": "Lengua de suegra (Sansevieria)", "dracaena fischeri": "Lengua de suegra (Sansevieria)", "dracaena concinna": "Lengua de suegra (Sansevieria)", "dracaena metallica": "Lengua de suegra (Sansevieria)", "dracaena patens": "Lengua de suegra (Sansevieria)", "dracaena stuckyi": "Lengua de suegra (Sansevieria)", "dracaena cylindrica": "Lengua de suegra (Sansevieria)", "dracaena angustifolia": "Dracaena", "allium schoenoprasum": "Cebollín",
     "citrus limon": "Limonero (maceta)", "euphorbia pulcherrima": "Pascua (flor de Pascua)", "viola wittrockiana": "Pensamiento",
     "viola tricolor": "Pensamiento", "solanum lycopersicum": "Tomate", "curio rowleyanus": "Collar de perlas",
     "senecio rowleyanus": "Collar de perlas", "ceropegia woodii": "Collar de perlas", "salvia rosmarinus": "Romero",
