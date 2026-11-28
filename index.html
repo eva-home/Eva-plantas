@@ -174,6 +174,10 @@ dl.facts dd { margin: 0; }
 .ident .inst-btn:disabled { opacity: 0.6; cursor: default; }
 .ident .id-alt { color: var(--accent); }
 .ident .id-out { margin-top: 14px; padding: 12px 14px; background: var(--field); color: var(--fg); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 6px 16px -12px rgba(0, 0, 0, 0.35); }
+.id-others { margin: 12px 0 0; color: var(--muted); font-size: 0.8rem; font-weight: 600; }
+.id-chips { margin-top: 6px; }
+.id-chips .chip { font-size: 0.8rem; text-align: left; }
+
 .ident .id-out .id-prev { margin-bottom: 10px; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ident { --id-1: #2d2821; --id-2: #231f1a; box-shadow: 0 10px 26px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.05); } :root:not([data-theme="light"]) .ident::before { opacity: 0.12; } }
 :root[data-theme="dark"] .ident { --id-1: #2d2821; --id-2: #231f1a; box-shadow: 0 10px 26px -12px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.05); }
@@ -586,7 +590,9 @@ if ("serviceWorker" in navigator) {
     chrysanthemum: "Crisantemo", dendranthema: "Crisantemo", camellia: "Camelia", fuchsia: "Fucsia", mandevilla: "Dipladenia (Mandevilla)",
     dipladenia: "Dipladenia (Mandevilla)", primula: "Primula", verbena: "Verbena", calendula: "Caléndula", tropaeolum: "Capuchina",
     helianthus: "Girasol", salvia: "Salvia", melissa: "Melisa (toronjil)", aloysia: "Cedrón (hierba luisa)", capsicum: "Ají (Capsicum)",
-    gazania: "Gazania" };
+    gazania: "Gazania", goeppertia: "Calathea", hylotelephium: "Sedum", ferocactus: "Cactus", gymnocalycium: "Cactus", rebutia: "Cactus",
+    astrophytum: "Cactus", parodia: "Cactus", cleistocactus: "Cactus", epiphyllum: "Cactus", lobivia: "Cactus", espostoa: "Cactus",
+    chamaecereus: "Cactus", cylindropuntia: "Cactus", stromanthe: "Maranta", haworthiopsis: "Haworthia", aloidendron: "Aloe vera (sábila)" };
 
   var btn = document.getElementById("idBtn"), pick = document.getElementById("idPick");
   var cam = document.getElementById("idCam"), gal = document.getElementById("idGal"), out = document.getElementById("idOut");
@@ -624,28 +630,45 @@ if ("serviceWorker" in navigator) {
     img.onerror = function () { URL.revokeObjectURL(url); cb(null); };
     img.src = url;
   }
-  function show(results, prev) {
-    var top = results[0], best = -1, pickR = null;
-    for (var i = 0; i < results.length; i++) {
-      if (results[i].score < 0.1 && i > 0) break;
-      var ix = matchPlant(results[i].species);
-      if (ix !== -1) { best = ix; pickR = results[i]; break; }
+  var lastRes = null, lastPrev = null;
+  function labelOf(r) {
+    var ix = matchPlant(r.species);
+    return ix !== -1 ? PLANTS[ix][0] : ((r.species.commonNames || [])[0] || r.species.scientificNameWithoutAuthor);
+  }
+  function show(results, prev, k) {
+    lastRes = results; lastPrev = prev;
+    if (k == null) {
+      k = 0;
+      for (var i = 0; i < results.length; i++) {
+        if (i > 0 && results[i].score < 0.1) break;
+        if (matchPlant(results[i].species) !== -1) { k = i; break; }
+      }
     }
-    var pct = function (r) { return Math.round(r.score * 100) + "%"; };
+    var r = results[k], sp = r.species, best = matchPlant(sp);
+    var sci = sp.scientificNameWithoutAuthor, cn = (sp.commonNames || [])[0];
+    var pct = function (x) { return Math.round(x.score * 100) + "%"; };
     var h = prev ? '<img class="id-prev" alt="Tu foto" src="' + prev + '">' : "";
     if (best !== -1) {
-      var r = pickR, sci = r.species.scientificNameWithoutAuthor;
-      h += '<p class="id-sci">' + esc(sci) + " · " + pct(r) + " de coincidencia</p>" +
+      h += '<p class="id-sci">Nombre científico: <i>' + esc(sci) + "</i> · " + pct(r) + " de coincidencia</p>" +
         '<ul style="list-style:none;margin:0;padding:0">' + rows[best].html.replace('<details class="more">', '<details class="more" open>') + "</ul>";
-      if (r.score < 0.3) h += '<p class="id-msg" style="margin-top:8px">La coincidencia es baja. Prueba con otra foto, más cerca de una hoja o flor y con buena luz.</p>';
+      if (r.score < 0.4) h += '<p class="id-msg" style="margin-top:8px">La coincidencia es media o baja. Revisa las otras opciones o prueba con otra foto, más cerca de una hoja o flor y con buena luz.</p>';
     } else {
-      var cn = (top.species.commonNames || [])[0];
-      h += '<p class="id-name">' + esc(cn || top.species.scientificNameWithoutAuthor) + '</p><p class="id-sci">' + esc(top.species.scientificNameWithoutAuthor) + " · " + pct(top) + ' de coincidencia</p>' +
+      h += '<p class="id-name">' + esc(cn || sci) + '</p><p class="id-sci">Nombre científico: <i>' + esc(sci) + "</i> · " + pct(r) + ' de coincidencia</p>' +
         '<p class="id-msg">Esta planta todavía no está en el catálogo de EVA, así que no tengo su rango de humedad. Prueba con otra foto o búscala abajo por nombre.</p>';
     }
+    var chips = "";
+    for (var j = 0; j < results.length; j++) {
+      if (j === k || results[j].score < 0.05) continue;
+      chips += '<button type="button" class="chip id-opt" data-k="' + j + '">' + esc(labelOf(results[j])) + " · " + pct(results[j]) + "</button>";
+    }
+    if (chips) h += '<p class="id-others">Otras posibles coincidencias</p><div class="chips id-chips">' + chips + "</div>";
     h += '<p class="id-credit">Identificación con <a href="https://plantnet.org" target="_blank" rel="noopener">Pl@ntNet</a></p>';
     out.hidden = false; out.innerHTML = h;
   }
+  out.addEventListener("click", function (e) {
+    var b = e.target.closest(".id-opt"); if (!b || !lastRes) return;
+    show(lastRes, lastPrev, parseInt(b.getAttribute("data-k"), 10));
+  });
   function identify(file) {
     if (!file || busy) return;
     if (PROXY_URL.indexOf("PEGA_") === 0) { msg("Falta configurar el servidor de identificación."); return; }
